@@ -1,14 +1,13 @@
-import pyodbc
-import pandas as pd
 import os
 import time
 import logging
+import pandas as pd
+import urllib
+from sqlalchemy import create_engine, text
 
-# '''
-# DESKTOP-FI1PI5E\SHIVSHAKTI
-# r"h:\KG PD\KG\Codebasics\ANALYTICS ALL\Python-SQL EDA\data\data" '''
 
-logging.basicConfig(filename='db_load.log', level=logging.INFO)
+logging.basicConfig(filename="DB_Ingest.log", level=logging.INFO)
+
 
 def log_event(event, start, end=None):
     start_time= time.time()
@@ -19,69 +18,68 @@ def log_event(event, start, end=None):
     logging.info(msg)
     print(end_time-start_time)
 
-def create_db(server, db_name):
-    conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE=master;Trusted_Connection=Yes"
-    conn = pyodbc.connect(conn_str, autocommit=True)
-    cursor = conn.cursor()
-    try:
-        cursor.execute(f"CREATE DATABASE {db_name}")
-        print("Database Created Successfully!")
-    except pyodbc.Error as e:
-        logging.info(f"Create DB error: {e}")
-        print("Error while connecting to DB", e)
-    cursor.close()
-    conn.close()
+server = r"xyz"   # Your SQL server name
+database = "DB_name"                   # change to your DB name
 
-def connect_db(server, db_name):
-    conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={db_name};Trusted_Connection=Yes"
-    print("Connected to DB sucessfully!")
-    return pyodbc.connect(conn_str, autocommit=True)
+# This string MUST be exactly what works with pyodbc.connect
+odbc_conn_str = (
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    f"SERVER={server};"
+    f"DATABASE={database};"
+    "Trusted_Connection=yes;"
+)
+#With Windows Authentication, no requirements for username and Password to connect
+params = urllib.parse.quote_plus(odbc_conn_str)
+
+engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
+
+print(f"Connected to DB {database} successfully!")
+
+#Test to verify the connection with the server is proper. Initially, because of multi method the ingestion was failing
+try:
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT 1 AS test"))
+        print("Connection OK, result:", result.scalar())
+except Exception as e:
+    print("Connection FAILED:", e)
+
+
+
+# INGEST ALL CSVs FROM THE FOLDER
+def ingest_folder_to_mssql(folder_path: str):
     
-def load_raw_data(folder_path):
-    file_list = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
-    print(file_list)
-    dfs = []                                                                                                                                                                  
-    for file in file_list:
-            print(f' Loading ...{file}')
-            df = pd.read_csv(os.path.join(folder_path, file))
-            dfs.append((file, df))
-    return dfs
+    folder_path = folder_path.strip()
+    files = sorted([f for f in os.listdir(folder_path)
+             if f.lower().endswith(".csv")])
 
-def db_ingest(conn, dfs):
-    print(" Beginning DB ingestion ")
-    cursor = conn.cursor()
-    for file, df in dfs:
+    for file in files:
+        start=time.time()
         table_name = os.path.splitext(file)[0]
-        cols = ','.join([f'[{col}] VARCHAR(255)' for col in df.columns])
-        cursor.execute(f"IF OBJECT_ID('{table_name}', 'U') IS NULL CREATE TABLE {table_name} ({cols})")
-        for row in df.itertuples(index=False, name=None):
-            col_names = ','.join([f'[{col}]' for col in df.columns])
-            placeholders = ','.join(['?' for _ in df.columns])
-            cursor.execute(f"INSERT INTO {table_name} ({col_names}) VALUES ({placeholders})", row)
-            print(f"Ingested {file}")
-    conn.commit()
-    cursor.close()
+        csv_path = os.path.join(folder_path, file)
 
-def main_loop(server, db_name, data_folder):
-    while True:
-        start = time.time()
-        dfs = load_raw_data(data_folder)
-        print("Connecting to Server")
-        conn = connect_db(server, db_name)
-        print("connected") #changes
-        db_ingest(conn, dfs)
-        print("Loaded and ingested") #changes
-        conn.close()
-        end = time.time()
-        log_event(f'Data load from CSVs {", ".join([f for f, _ in dfs])}', start, end)
-        print(f"Loaded to DB {db_name}. Sleeping 10 minutes…")
-        #time.sleep(600)
+        print(f"Loading {csv_path} -> table [{table_name}]")
 
-if __name__ == "__main__":
-    server = input("Enter SQL Server name (e.g. DESKTOP-FI1PI5E\\SHIVSHAKTI): ")
-    db_name = input("Enter database name to create/use: ")
-    data_folder = input("Enter folder path containing CSVs: ")
-    create = input("Create new DB? (yes/no): ").strip().lower()
-    if create == 'yes':
-        create_db(server, db_name)
-    main_loop(server, db_name, data_folder)
+        df = pd.read_csv(csv_path)
+
+        df = df.apply(
+            lambda col: col.astype(str).str.strip()
+            if col.dtype == object else col
+        )
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            if_exists="replace",
+            index=False,
+            chunksize=1000,
+            #method="multi"  
+        )
+        end=time.time()
+        log_event(f"Loaded {file}", start, end)
+        print(f"✅ Ingested {file} into [{table_name}]")
+
+folder = r"Your folder location"   # e.g. r"C:\Users\you\vendor_project\data"
+ingest_folder_to_mssql(folder)
+
+
+
