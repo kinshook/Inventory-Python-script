@@ -7,7 +7,7 @@ AIM:
 5) Use the EDA insights to visualize them.
 
 # Inventory-Python-script
-The load_CSV data for EDA-SQL inventory.py ingests all the .csv files from the local device to a database(MSSQL in this case).
+The [load_CSV data for EDA-SQL inventory.py ](https://github.com/kinshook/Inventory-Python-script/commit/5edd3e1ac01be3bb2b571fa00f3ad008ce97b77e)ingests all the .csv files from the local device to a database(MSSQL in this case).
 
 ETL and EDA of inventory:
 To perform accurate analyses, we perform a crucial ETL process of extracting relevant data from the vast dataset, cleaning and transforming it, and reinserting it into the database for ease of access for stakeholders. The cleaning script is attached as EDA (mention the file location by copying it)
