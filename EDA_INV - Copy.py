@@ -11,7 +11,7 @@ pd.set_option("display.max_rows",None)
 pd.set_option("display.max_columns",None)
 
 # creating db connection
-engine=create_engine(r"mssql+pyodbc://@SANJAY\BOSS/inv?DRIVER=ODBC DRIVER 17 FOR SQL SERVER&Trusted+Connection=Yes")
+engine=create_engine(r"mssql+pyodbc://@your_server/inv?DRIVER=ODBC DRIVER 17 FOR SQL SERVER&Trusted+Connection=Yes")
 
 #Loading the dataframe
 df= pd.read_sql_query("SELECT * FROM vendor_sales_summary",engine)
@@ -75,39 +75,39 @@ df_analyse=pd.read_sql_query("""SELECT * FROM vendor_sales_summary
 # print(df_analyse)
 numerical_cols= df_analyse.select_dtypes(include=np.number).columns
 
-# plt.figure(figsize=(15,10))
-# for i,col in enumerate(numerical_cols):
-#     plt.subplot(4,4,i+1) #Adjust grid layout as needed
-#     sns.histplot(df_analyse[col], kde=True, bins=30)
-#     plt.suptitle(f"Numerical col distributions")       
-#     # plt.title(col)
-# plt.tight_layout(rect=[0, 0, 1, 0.95])
-# plt.show()
+plt.figure(figsize=(15,10))
+for i,col in enumerate(numerical_cols):
+    plt.subplot(4,4,i+1) #Adjust grid layout as needed
+    sns.histplot(df_analyse[col], kde=True, bins=30)
+    plt.suptitle(f"Numerical col distributions")       
+    # plt.title(col)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
 
 
-# # Distribution plots for numerical columns
-# plt.figure(figsize=(15,10))
-# for i,col in enumerate(numerical_cols):
-#     plt.subplot(4,4,i+1) #Adjust grid layout as needed
-#     sns.boxplot(df_analyse[col])
-#     plt.suptitle(f"Numerical col distributions")       
-#     # plt.title(col)
-# plt.tight_layout(rect=[0, 0, 1, 0.95]) #rect=[left, bottom, right, top]         
-# plt.show()
+# Distribution plots for numerical columns
+plt.figure(figsize=(15,10))
+for i,col in enumerate(numerical_cols):
+    plt.subplot(4,4,i+1) #Adjust grid layout as needed
+    sns.boxplot(df_analyse[col])
+    plt.suptitle(f"Numerical col distributions")       
+    # plt.title(col)
+plt.tight_layout(rect=[0, 0, 1, 0.95]) #rect=[left, bottom, right, top]         
+plt.show()
 
 
 
-# #Count plot for categorical cols(aiding in vendors and prod insights)
-# categorical_cols= ['VendorName', 'Description']
-# plt.figure(figsize=(12,5))
-# for i,col in enumerate(categorical_cols): #for i,col in enumerate(numerical_cols):
-#     plt.subplot(1,2,i+1) #Adjust grid layout as needed #ValueError: num must be an integer with 1 <= num <= 2, not 3 occuring due tp numerical_cols being called as limit i for looop
-#     sns.countplot(y=df_analyse[col], order=df_analyse[col].value_counts().index[:10]) #top 10
-#     plt.suptitle(f"CountPlot of Categories")      
-#     plt.title(f"CountPlot of {col}") 
-#     # plt.title(col)
-# plt.tight_layout(rect=[0, 0, 1, 0.95]) #rect=[left, bottom, right, top]         
-# plt.show()
+#Count plot for categorical cols(aiding in vendors and prod insights)
+categorical_cols= ['VendorName', 'Description']
+plt.figure(figsize=(12,5))
+for i,col in enumerate(categorical_cols): #for i,col in enumerate(numerical_cols):
+    plt.subplot(1,2,i+1) #Adjust grid layout as needed #ValueError: num must be an integer with 1 <= num <= 2, not 3 occuring due tp numerical_cols being called as limit i for looop
+    sns.countplot(y=df_analyse[col], order=df_analyse[col].value_counts().index[:10]) #top 10
+    plt.suptitle(f"CountPlot of Categories")      
+    plt.title(f"CountPlot of {col}") 
+    # plt.title(col)
+plt.tight_layout(rect=[0, 0, 1, 0.95]) #rect=[left, bottom, right, top]         
+plt.show()
 
 
 #Correlation Heatmap
@@ -134,31 +134,31 @@ plt.show()
 
 # Q1 Identify Brands that need promotional or pricing adjustments that exhibit lower sales performance but higher profit margins
 
-# brand_performance= df_analyse.groupby('Description').aggregate({'TotalSalesDollars': 'sum', 'ProfitMarginPercent': 'mean'}).reset_index()
-# # brand_performance=brand_performance[brand_performance['TotalSalesDollars']<5000] #just for better visualization
+brand_performance= df_analyse.groupby('Description').aggregate({'TotalSalesDollars': 'sum', 'ProfitMarginPercent': 'mean'}).reset_index()
+# brand_performance=brand_performance[brand_performance['TotalSalesDollars']<5000] #just for better visualization
 
-# low_sales_threshold = brand_performance['TotalSalesDollars'].quantile(.15)
-# high_margin_threshold = brand_performance['ProfitMarginPercent'].quantile(.85)
-# print(low_sales_threshold, high_margin_threshold)
+low_sales_threshold = brand_performance['TotalSalesDollars'].quantile(.15)
+high_margin_threshold = brand_performance['ProfitMarginPercent'].quantile(.85)
+print(low_sales_threshold, high_margin_threshold)
 
-# #filtering brands with low sales and high margin threshold based on above logic 
-# target_brands=brand_performance[
-#     (brand_performance['TotalSalesDollars'] <=low_sales_threshold) &
-#     (brand_performance['ProfitMarginPercent']>=high_margin_threshold)
-#     ]
-# # print(target_brands)
-# plt.figure(figsize=(10,6))
-# sns.scatterplot(data=brand_performance, x='TotalSalesDollars', y='ProfitMarginPercent', color='blue', label='All Brands', alpha=.2)
-# sns.scatterplot(data=target_brands,x='TotalSalesDollars', y='ProfitMarginPercent', color='red', label='Target Brands')
+#filtering brands with low sales and high margin threshold based on above logic 
+target_brands=brand_performance[
+    (brand_performance['TotalSalesDollars'] <=low_sales_threshold) &
+    (brand_performance['ProfitMarginPercent']>=high_margin_threshold)
+    ]
+# print(target_brands)
+plt.figure(figsize=(10,6))
+sns.scatterplot(data=brand_performance, x='TotalSalesDollars', y='ProfitMarginPercent', color='blue', label='All Brands', alpha=.2)
+sns.scatterplot(data=target_brands,x='TotalSalesDollars', y='ProfitMarginPercent', color='red', label='Target Brands')
 
-# plt.axhline(high_margin_threshold, linestyle="--" , color='black', label="High Margin Threshold")
-# plt.axvline(low_sales_threshold, linestyle="--" , color='black', label="Low Sales Threshold")
+plt.axhline(high_margin_threshold, linestyle="--" , color='black', label="High Margin Threshold")
+plt.axvline(low_sales_threshold, linestyle="--" , color='black', label="Low Sales Threshold")
 
-# plt.ylabel('ProfitMargin %')
-# plt.xlabel('Total Sales $')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
+plt.ylabel('ProfitMargin %')
+plt.xlabel('Total Sales $')
+plt.legend()
+plt.grid(True)
+plt.show()
 
 
 # # Q2 Which brands and vendor show highest sales performance
@@ -173,27 +173,27 @@ def format_dollar(value):
         return str(value)
     
 
-# # Top vendors and brands by sales performance
-# top_vendors= df_analyse.groupby("VendorName")['TotalSalesDollars'].sum().nlargest(10)
-# top_brands = df_analyse.groupby("Description")['TotalSalesDollars'].sum().nlargest(10)
-# print(top_vendors.apply(lambda x: format_dollar(x)), top_brands.apply(lambda x: format_dollar(x)))
-# # PLOTS for top Vendors andTop brands
+# Top vendors and brands by sales performance
+top_vendors= df_analyse.groupby("VendorName")['TotalSalesDollars'].sum().nlargest(10)
+top_brands = df_analyse.groupby("Description")['TotalSalesDollars'].sum().nlargest(10)
+print(top_vendors.apply(lambda x: format_dollar(x)), top_brands.apply(lambda x: format_dollar(x)))
+# PLOTS for top Vendors andTop brands
 
-# plt.subplot(1,2,1)
-# ax1= sns.barplot(y=top_vendors.index,x= top_vendors.values, palette='Blues_r' )
-# plt.title("Top 10 Vendors by sale")
-# for bar in ax1.patches:
-#     ax1.text(bar.get_linewidth() + (bar.get_linewidth()*.02), 
-#              bar.get_y() + bar.get_height()/2,
-#               format_dollar(bar.get_linewidth()),
-#                ha='left', va='center',fontsize=10, color= 'black' )
+plt.subplot(1,2,1)
+ax1= sns.barplot(y=top_vendors.index,x= top_vendors.values, palette='Blues_r' )
+plt.title("Top 10 Vendors by sale")
+for bar in ax1.patches:
+    ax1.text(bar.get_linewidth() + (bar.get_linewidth()*.02), 
+             bar.get_y() + bar.get_height()/2,
+              format_dollar(bar.get_linewidth()),
+               ha='left', va='center',fontsize=10, color= 'black' )
 
 
-# plt.subplot(1,2,1)
-# ax1= sns.barplot(y=top_brands.index.astype(str),x= top_brands.values, palette='Reds_r' )
-# plt.title("Top 10 Brands by sale")
-# plt.tight_layout()
-# plt.show()
+plt.subplot(1,2,1)
+ax1= sns.barplot(y=top_brands.index.astype(str),x= top_brands.values, palette='Reds_r' )
+plt.title("Top 10 Brands by sale")
+plt.tight_layout()
+plt.show()
 
 # Q3 Which vendors contribute most to the total Purchased Dollars?
 
@@ -214,37 +214,3 @@ top_10_vendors['GrossProfit'] = top_10_vendors['GrossProfit'].round(2).apply( la
 # Q4 How much of the total procurement is dependent on top vendors
 top_10_vendors['PurchasedContri_cum_sum'] = top_10_vendors['PurchasedContribution%'].cumsum().round(3)
 print(f"total purchcase contribution of top 10 vendorts is : {round(top_10_vendors['PurchasedContribution%'].sum(),2)} %")
-
-
-#Q5 Does purchasing in bulk reduce the unit price, what is optimal purchase volume for cost savings?
-
-# Q6 Which vendors have low inventory turnover,indicating excess stock and slow-moving products   
-
-# Q7 How much inventory is locked in unsold inventory per vendor, which vendors contribute the most to it
-
-# Q8 what is 95% confidence interval for profit margins top and low performing vendors
-
-
-# new_purchases=pd.read_sql_query("""SELECT * FROM purchase_prices WHERE 
-#                      VendorName='SOUTHERN GLAZERS W&S OF NE' OR 
-#                      VendorName='SOUTHERN WINE & SPIRITS NE' OR
-#                      VendorName='VINEYARD BRANDS INC' OR
-#                      VendorName='VINEYARD BRANDS LLC'  ORDER BY VendorName""",engine)
-# new_purchases=pd.read_sql_query("""SELECT VendorNumber,VendorName , Description  FROM purchase_prices WHERE VendorNumber=2000 OR
-#                      VendorNumber=1587 AND Description='Stella Pinot Grigio Umbria'
-#                      ORDER BY Description,VendorName""",engine)
-# new_purchases=pd.read_sql_query("""SELECT * FROM purchase_prices WHERE Description='Stella Pinot Grigio Umbria'
-#                      """,engine)
-# df=pd.read_sql_query("""SELECT Size,Quantity  from purchases """,engine)
-# # print(df.groupby(by='Description').agg({'VendorName' : list , 'VendorNumber' : list}))
-
-# # print(df.groupby(by='Description')  ['VendorName'])
-# # print(df.groupby(by='Description')[['VendorNumber , 'VendorName']].apply(list))
-# # print(df['Description'].duplicated( )) 
-
-
-
-
-
-
-
