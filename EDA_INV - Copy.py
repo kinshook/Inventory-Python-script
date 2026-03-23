@@ -31,25 +31,6 @@ df= pd.read_sql_query("SELECT * FROM vendor_sales_summary",engine)
 numerical_cols= df.select_dtypes(include=np.number).columns
 
 
-# plt.figure(figsize=(15,10))
-# for i,col in enumerate(numerical_cols):
-#     plt.subplot(4,4,i+1) #Adjust grid layout as needed
-#     sns.histplot(df[col], kde=True, bins=30)
-#     plt.suptitle(f"Numerical col distributions")       
-#     # plt.title(col)
-# plt.tight_layout(rect=[0, 0, 1, 0.95])
-# plt.show()
-
-
-# Distribution plots for numerical columns
-# plt.figure(figsize=(15,10))
-# for i,col in enumerate(numerical_cols):
-#     plt.subplot(4,4,i+1) #Adjust grid layout as needed
-#     sns.boxplot(df[col])
-#     plt.suptitle(f"Numerical col distributions")       
-#     # plt.title(col)
-# plt.tight_layout(rect=[0, 0, 1, 0.95]) #rect=[left, bottom, right, top]         
-# plt.show()
 
 # Gross profit: Min value is... indicating losses.Some produccts/transactions might be sold at a loss 
 # due to high costs orselling at a discount lower than the purchase price.
@@ -75,17 +56,17 @@ df_analyse=pd.read_sql_query("""SELECT * FROM vendor_sales_summary
 # print(df_analyse)
 numerical_cols= df_analyse.select_dtypes(include=np.number).columns
 
-plt.figure(figsize=(15,10))
-for i,col in enumerate(numerical_cols):
-    plt.subplot(4,4,i+1) #Adjust grid layout as needed
-    sns.histplot(df_analyse[col], kde=True, bins=30)
-    plt.suptitle(f"Numerical col distributions")       
-    # plt.title(col)
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.show()
+# plt.figure(figsize=(15,10))
+# for i,col in enumerate(numerical_cols):
+#     plt.subplot(4,4,i+1) #Adjust grid layout as needed
+#     sns.histplot(df_analyse[col], kde=True, bins=30)
+#     plt.suptitle(f"Numerical col distributions")       
+#     # plt.title(col)
+# plt.tight_layout(rect=[0, 0, 1, 0.95])
+# plt.show()
 
 
-# Distribution plots for numerical columns
+# # Distribution plots for numerical columns
 plt.figure(figsize=(15,10))
 for i,col in enumerate(numerical_cols):
     plt.subplot(4,4,i+1) #Adjust grid layout as needed
@@ -97,7 +78,7 @@ plt.show()
 
 
 
-#Count plot for categorical cols(aiding in vendors and prod insights)
+# #Count plot for categorical cols(aiding in vendors and prod insights)
 categorical_cols= ['VendorName', 'Description']
 plt.figure(figsize=(12,5))
 for i,col in enumerate(categorical_cols): #for i,col in enumerate(numerical_cols):
@@ -173,11 +154,12 @@ def format_dollar(value):
         return str(value)
     
 
-# Top vendors and brands by sales performance
-top_vendors= df_analyse.groupby("VendorName")['TotalSalesDollars'].sum().nlargest(10)
+# # Top vendors and brands by sales performance
+top_vendors = df_analyse.groupby("VendorName")['TotalSalesDollars'].sum().nlargest(10)
 top_brands = df_analyse.groupby("Description")['TotalSalesDollars'].sum().nlargest(10)
 print(top_vendors.apply(lambda x: format_dollar(x)), top_brands.apply(lambda x: format_dollar(x)))
-# PLOTS for top Vendors andTop brands
+
+# Plots for top Vendors andTop brands
 
 plt.subplot(1,2,1)
 ax1= sns.barplot(y=top_vendors.index,x= top_vendors.values, palette='Blues_r' )
@@ -213,4 +195,100 @@ top_10_vendors['GrossProfit'] = top_10_vendors['GrossProfit'].round(2).apply( la
 
 # Q4 How much of the total procurement is dependent on top vendors
 top_10_vendors['PurchasedContri_cum_sum'] = top_10_vendors['PurchasedContribution%'].cumsum().round(3)
-print(f"total purchcase contribution of top 10 vendorts is : {round(top_10_vendors['PurchasedContribution%'].sum(),2)} %")
+# print(f"total purchcase contribution of top 10 vendorts is : {round(top_10_vendors['PurchasedContribution%'].sum(),2)} %")
+
+
+#Q5 Does purchasing in bulk reduce the unit price? What is the optimal purchase volume for cost savings?
+# approach: create rough unit prices based on purchase size; compare based on Order size 
+df_analyse['UnitPurchasePrice'] = df_analyse['TotalPurchasedDollars']/ df_analyse['TotalPurchasedQuantity']
+df_analyse['OrderSize'] = pd.qcut(df_analyse['TotalPurchasedQuantity'], q=3,  labels=["Small", "Medium", "Large"])
+print(df_analyse.groupby(['OrderSize'])['UnitPurchasePrice'].mean())
+# plt.figure(figsize=(15,10))
+# sns.boxplot(x=df_analyse['OrderSize'], y= df_analyse['UnitPurchasePrice'])
+# plt.suptitle(f"OrderSize Outliers")       
+#     # plt.title(col)
+# plt.tight_layout(rect=[0, 0, 1, 0.95]) #rect=[left, bottom, right, top]         
+# plt.show()
+
+# Vendors buying in bulk(large Order size) get the lowest avg unit prices($ 11.24) i.e higher margins if they maintain inventory efficiently
+# The price difference between large and small ordersize is substantial(~ 72% reduction in unit cost)
+# The above proves that bulk strategy aids in 
+
+
+
+# Q6 Which vendors have low inventory turnover, indicating excess stock and slow-moving products   
+print(df_analyse[df_analyse['StockTurnover']<1].groupby('VendorName')['StockTurnover'].mean().sort_values(ascending=True))
+plt.figure(figsize=(15,10))
+sns.boxplot(x=df_analyse['VendorName'], y=df_analyse['StockTurnover'])
+plt.suptitle(f"Stock Turnover Per Vendor")
+plt.show()
+
+# Q7 How much inventory is locked in unsold inventory per vendor, which vendors contribute the most to it
+unsold_capital= (df_analyse['TotalPurchasedQuantity'] - df_analyse['TotalSalesQuantity']) * df_analyse['UnitPurchasePrice']
+
+
+# Q8 what is 95% confidence interval for profit margins top and low performing vendors
+top_threshold = df_analyse['TotalSalesDollars'].quantile(.75)
+low_threshold = df_analyse['TotalSalesDollars'].quantile(.15)
+
+top_vendors= df_analyse[df_analyse['TotalSalesDollars'] >= top_threshold]['TotalSalesDollars'].dropna()
+low_vendors = df_analyse[df_analyse['TotalSalesDollars'] <= low_threshold]['TotalSalesDollars'].dropna()
+
+def confidence_interval(data, confidence= .95):
+    mean_val=np.mean(data)
+    std_error=np.std(data,ddof=1)/np.sqrt(len(data))
+    t_critical = stats.t.ppf((1+confidence)/2 , df= len(data)-1)
+    error_margin = t_critical*std_error
+    return mean_val, mean_val-error_margin, mean_val+error_margin
+
+# ── Compute confidence intervals ─────────────────────────────────
+top_mean, top_lower, top_upper = confidence_interval(top_vendors)
+low_mean, low_lower, low_upper = confidence_interval(low_vendors)
+
+print(f"Top Vendors 95% CI: ({top_lower:.2f}, {top_upper:.2f}), Mean: {top_mean:.2f}")
+print(f"Low Vendors 95% CI: ({low_lower:.2f}, {low_upper:.2f}), Mean: {low_mean:.2f}")
+
+
+plt.figure(figsize=(12, 6))
+
+# Top Vendors distribution
+sns.histplot(top_vendors, kde=True, color="blue", bins=30,
+             alpha=0.5, label="Top Vendors")
+plt.axvline(top_lower, color="blue", linestyle="--",
+            label=f"Top Lower: {top_lower:.2f}")
+plt.axvline(top_upper, color="blue", linestyle="--",
+            label=f"Top Upper: {top_upper:.2f}")
+plt.axvline(top_mean,  color="blue", linestyle="-",
+            label=f"Top Mean:  {top_mean:.2f}")
+
+# Low Vendors distribution
+sns.histplot(low_vendors, kde=True, color="red", bins=30,
+             alpha=0.5, label="Low Vendors")
+plt.axvline(low_lower, color="red", linestyle="--",
+            label=f"Low Lower: {low_lower:.2f}")
+plt.axvline(low_upper, color="red", linestyle="--",
+            label=f"Low Upper: {low_upper:.2f}")
+plt.axvline(low_mean,  color="red", linestyle="-",
+            label=f"Low Mean:  {low_mean:.2f}")
+
+plt.title("95% Confidence Interval — Stock Turnover: Top vs Low Vendors")
+plt.xlabel("Stock Turnover")
+plt.ylabel("Frequency")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+ ## What Each Part Does
+
+# | Component | Purpose |
+# |---|---|
+# | `stats.sem()` | Standard error of mean — measures how precisely the mean is estimated |
+# | `stats.t.interval()` | t-distribution CI — more accurate than z-distribution for real datasets |
+# | `df=len(data)-1` | Degrees of freedom — accounts for sample size |
+# | `axvline` solid `-` | Mean of the distribution |
+# | `axvline` dashed `--` | Lower and upper CI bounds |
+# | `kde=True` | Smooth density curve overlaid on histogram |
+
+
+# If the two CI ranges DON'T overlap → statistically significant difference
+# If they DO overlap               → difference may be due to chance
