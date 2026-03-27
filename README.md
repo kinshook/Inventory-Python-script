@@ -6,7 +6,7 @@ AIM:
 4) Perform EDA on the cleaned analysis-ready dataset using statistical and graphical tools and answer the required questions.
 5) Use the EDA insights to visualize them.
 
-# Inventory-Python-script
+# Vendor Performance Analyses
 The [load_CSV data for EDA-SQL inventory.py ](https://github.com/kinshook/Inventory-Python-script/commit/5edd3e1ac01be3bb2b571fa00f3ad008ce97b77e)ingests all the .csv files from the local device to a database(MSSQL in this case).
 
 ETL and EDA of inventory:
