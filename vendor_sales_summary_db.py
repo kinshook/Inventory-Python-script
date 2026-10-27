@@ -14,8 +14,8 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-server   = r"SANJAY\BOSS"
-database = "inv"
+server   = r"your_server_name"
+database = "your_database_name"
 
 conn_str = (
     "DRIVER={ODBC DRIVER 17 FOR SQL SERVER};"
