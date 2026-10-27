@@ -14,6 +14,6 @@ The [load_CSV data for EDA-SQL inventory.py ](https://github.com/kinshook/Invent
 ETL and EDA of inventory:
 To perform accurate analyses, we run an ETL process to extract relevant data from the dataset files, clean and transform it, and reinsert it into the database for easy access by stakeholders. The cleaning script is attached as [vendor_sales_summary_db.py](https://github.com/kinshook/Inventory-Python-script/blob/main/vendor_sales_summary_db.py) along with the KPIs.
 
-After ingesting the consolidated dataset vendor_sales_summary into the database, the statistical representation and variable relationships are analyzed using EDA. To answer relevant KPI and business questions, we break down the dataset and perform the required operations and graphical plots using the [python script]().
+After ingesting the consolidated dataset vendor_sales_summary into the database, the statistical representation and variable relationships are analyzed using EDA. To answer relevant KPI and business questions, we break down the dataset and perform the required operations and graphical plots using the [python script](https://github.com/kinshook/Inventory-Python-script/blob/main/EDA_INV_orgzd.py).
 
 The Dashboard report and detailed analysis can be viewed here [Vendor Performance Dashboard](https://github.com/kinshook/Inventory-Python-script/blob/main/Vendor%20Performance%20Analysis.pbix)
