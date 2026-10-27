@@ -1,5 +1,5 @@
-
-AIM: 
+Aim: Gather information on the vendor performance by highlighting the Individual Vendor Sales, Gross Margin, Net Profit etc. Additionally, analyse the brand pricing details and 
+Workflow: 
 1)Collect and ingest the required dataset into a single place, like a database(in our case).
 2) Extract only the meaningful data from the pool of the database.
 3) Explore, refine, and clean the extracted dataset and then upload it to the database
