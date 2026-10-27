@@ -1,4 +1,4 @@
-Aim: Gather information on vendor performance by highlighting individual vendor sales, Gross Margin, Net Profit, stock turnover, etc. Additionally, analyse the brand pricing details, unsold inventory relationship with individual vendors and calculate the 95% confidence interval for profit margins. 
+Aim: Gather information on vendor performance by highlighting individual vendor sales, Gross Margin, Net Profit, stock turnover, etc. Additionally, analyse the brand pricing details, identify brands requiring pricing and promotional adjustments, examine the relationship between unsold inventory and individual vendors, and calculate the 95% confidence interval for profit margins. 
 
 
 Workflow: 
