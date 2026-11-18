@@ -7,6 +7,10 @@ Workflow:
 3) Explore, refine, and clean the extracted dataset and then upload it to the database
 4) Perform EDA on the cleaned analysis-ready dataset using statistical and graphical tools and answer the required questions.
 5) Use the EDA insights to visualize them.
+<img width="1600" height="870" alt="01_project_workflow_overview" src="https://github.com/user-attachments/assets/fc898897-6279-406b-93f0-d4c761c0d61c" />
+
+
+
 
 # Vendor Performance Analysis
 The [load_CSV data for EDA-SQL inventory.py ](https://github.com/kinshook/Inventory-Python-script/commit/5edd3e1ac01be3bb2b571fa00f3ad008ce97b77e)ingests all the .csv files from the local device to a database(MSSQL in this case).
