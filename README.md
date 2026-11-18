@@ -22,3 +22,6 @@ To perform accurate analyses, we run an ETL process to extract relevant data fro
 After ingesting the consolidated dataset vendor_sales_summary into the database, the statistical representation and variable relationships are analyzed using EDA. To answer relevant KPI and business questions, we break down the dataset and perform the required operations and graphical plots using the [python script](https://github.com/kinshook/Inventory-Python-script/blob/main/EDA_INV_orgzd.py).
 
 The Dashboard report and detailed analysis can be viewed here [Vendor Performance Dashboard](https://github.com/kinshook/Inventory-Python-script/blob/main/Vendor%20Performance%20Analysis.pbix)
+
+<img width="1166" height="657" alt="Screenshot 2026-03-22 220708" src="https://github.com/user-attachments/assets/2a25c004-6bb4-4924-8aff-c2c8e0c8c3e6" />
+
