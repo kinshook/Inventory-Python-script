@@ -7,7 +7,8 @@ Workflow:
 3) Explore, refine, and clean the extracted dataset and then upload it to the database
 4) Perform EDA on the cleaned analysis-ready dataset using statistical and graphical tools and answer the required questions.
 5) Use the EDA insights to visualize them.
-<img width="1600" height="870" alt="01_project_workflow_overview" src="https://github.com/user-attachments/assets/fc898897-6279-406b-93f0-d4c761c0d61c" />
+<img width="2328" height="1021" alt="01_project_workflow_overview" src="https://github.com/user-attachments/assets/7aaf5df6-b9a4-4143-8f83-0f3d208dc115" />
+
 
 
 
